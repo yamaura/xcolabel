@@ -14,7 +14,7 @@
 //! ```
 //! use xcolabel::ToCellString;
 //!
-//! assert_eq!((4, 2).to_cell_string(), "C5"); // value is 0-based (row, column)
+//! assert_eq!((4u32, 2u32).to_cell_string(), "C5"); // value is 0-based (row, column)
 //! ```
 //!
 pub use core::num::IntErrorKind;
@@ -243,11 +243,27 @@ pub trait ToCellString {
     fn to_cell_string(&self) -> String;
 }
 
-impl ToCellString for (u32, u32) {
-    fn to_cell_string(&self) -> String {
-        self.1.to_column_string() + &(self.0 + 1).to_string()
-    }
+macro_rules! to_cell_string_impl {
+    ($t1:ty, $t2:ty) => {
+        impl ToCellString for ($t1, $t2) {
+            fn to_cell_string(&self) -> String {
+                self.1.to_column_string() + &(self.0 + 1).to_string()
+            }
+        }
+    };
 }
+
+to_cell_string_impl!(u8, u8);
+to_cell_string_impl!(u16, u16);
+to_cell_string_impl!(u32, u32);
+to_cell_string_impl!(u32, u64);
+to_cell_string_impl!(u32, usize);
+to_cell_string_impl!(u64, u32);
+to_cell_string_impl!(u64, u64);
+to_cell_string_impl!(u64, usize);
+to_cell_string_impl!(usize, u32);
+to_cell_string_impl!(usize, u64);
+to_cell_string_impl!(usize, usize);
 
 /// A trait to convert from cell string like "C4"
 pub trait TryFromCellStr<T>: Sized {
@@ -382,7 +398,7 @@ mod tests {
 
     #[test]
     fn to_colmun() {
-        assert_eq!("A1", (0, 0).to_cell_string());
-        assert_eq!("AA52", (51, 26).to_cell_string());
+        assert_eq!("A1", (0u32, 0u32).to_cell_string());
+        assert_eq!("AA52", (51u32, 26u32).to_cell_string());
     }
 }
